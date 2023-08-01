@@ -1,3 +1,4 @@
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
@@ -6,33 +7,24 @@ namespace WebApi.Controllers;
 [Route("[controller]")]
 public class FileController : ControllerBase
 {
-    private readonly IWebHostEnvironment _hostEnvironment;
+    private readonly IFileService _fileService;
 
-    public FileController(IWebHostEnvironment hostEnvironment)
+    public FileController(IFileService fileService)
     {
-        _hostEnvironment = hostEnvironment;
+        _fileService = fileService;
     }
 
     [HttpPost("upload-image")]
     public string Upload(IFormFile image)
     {
-        var fullPath = Path.Combine(_hostEnvironment.WebRootPath, "images", image.FileName);
-        
-        using (var stream = new FileStream(fullPath, FileMode.Create))
-        {
-            image.CopyTo(stream);
-        }
-
-        return image.FileName;
+        return _fileService.CreateFile("images",image);
     }
     
     [HttpPost("delete-image")]
-    public string Upload(string imagename)
+    public bool Upload(string imagename)
     {
-        var fullPath = Path.Combine(_hostEnvironment.WebRootPath, "images", imagename);
-
-        System.IO.File.Delete(fullPath);
-        return "done";
+        var response  = _fileService.DeleteFile("images", imagename);
+        return response;
     }
     
     
